@@ -25,7 +25,7 @@ on:
           - "Off"
         default: "On"
       resukisu_multimanager:
-        description: 👥 Multimanager 支持（weishu KSU、5ec1cff KSU、rsuntk KSU、KowSU、MamboSU、KernelSU NEXT、WildKSU）
+        description: 👥 Multimanager 支持（weishu KSU、5ec1cff KSU、rsuntk KSU、SukiSU Ultra, KernelSU Next, kowsu, MamboSU, WildKSU）
         required: true
         type: choice
         options:
