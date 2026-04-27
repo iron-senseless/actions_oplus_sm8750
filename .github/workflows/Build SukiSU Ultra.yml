@@ -230,6 +230,13 @@ jobs:
           echo "/usr/local/bin" >> $GITHUB_PATH
           echo "✅ ECS ccache: $(/usr/local/bin/ccache --version | head -1)"
 
+      - name: Save ccache-ECS binary cache
+        uses: actions/cache/save@v4
+        if: always()
+        with:
+          path: /tmp/ccache-ecs-bin
+          key: ccache-ecs-${{ runner.os }}-084a7620
+
       - name: Configure CCache Directory
         run: |
           echo "CCACHE_DIR=$HOME/.ccache_6.6.127" >> $GITHUB_ENV
