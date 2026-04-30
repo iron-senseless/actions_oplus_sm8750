@@ -180,7 +180,7 @@ jobs:
           sudo apt-mark hold libc-bin &&
           sudo apt purge man-db &&
           sudo apt update &&
-          sudo apt-get install -y --no-install-recommends binutils python-is-python3 ninja libssl-dev libelf-dev aria2 dos2unix &
+          sudo apt-get install -y --no-install-recommends binutils python-is-python3 libssl-dev libelf-dev aria2 dos2unix &
 
           echo "Cloning source repository..."
           curl -L https://github.com/palazik/OnePlus_Kernel_Backport/archive/refs/heads/6.6.127_oneplus13_coloros16.0.5.zip -o common.zip && 
@@ -934,9 +934,10 @@ jobs:
             KCFLAGS="-O2 -Wno-error -Wno-implicit-function-declaration -Wno-implicit-int -Wno-default-const-init-var-unsafe -Wno-format -Wno-unknown-warning-option" \
             gki_defconfig
 
-          ninja -j$(nproc --all) -C out Image LLVM=1 LLVM_IAS=1 ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- \
+          make -j$(nproc --all) LLVM=1 LLVM_IAS=1 ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- \
             CC="ccache clang" LD="$(pwd)/ld-wrapper" HOSTLD="$(pwd)/ld-wrapper" O=out \
-            KCFLAGS="-O2 -Wno-error -Wno-implicit-function-declaration -Wno-implicit-int -Wno-default-const-init-var-unsafe -Wno-format -Wno-unknown-warning-option ${EXTRA_CFLAGS:-} ${MAP}"
+            KCFLAGS="-O2 -Wno-error -Wno-implicit-function-declaration -Wno-implicit-int -Wno-default-const-init-var-unsafe -Wno-format -Wno-unknown-warning-option ${EXTRA_CFLAGS:-} ${MAP}" \
+            Image
 
           echo "Kernel Compilation Complete!"
 
