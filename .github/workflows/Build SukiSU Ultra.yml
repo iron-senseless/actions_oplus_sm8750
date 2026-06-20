@@ -472,18 +472,8 @@ jobs:
             sed -i '/diff --git a\/fs\/proc\/task_mmu.c b\/fs\/proc\/task_mmu.c/,/diff --git/ { /diff --git b/!d }' 50_add_susfs_in_gki-android15-6.6.patch
             sed -i '/diff --git a\/fs\/proc\/task_mmu.c b\/fs\/proc\/task_mmu.c/d' 50_add_susfs_in_gki-android15-6.6.patch
 
-            # 2. Safely find the exact line 'if (vma->vm_end > last_vma_end)' right under Case 4 and expand it inline
-            # This precisely avoids clipping the macro loop structure below it
-            sed -i '/\/\* Case 4 above \*\// {
-              n
-              :loop
-              /if (vma->vm_end > last_vma_end)/ {
-                c\			if (vma->vm_end > last_vma_end) {\n#ifdef CONFIG_KSU_SUSFS_SUS_MAP\n\t\t\t\tif (!vma->vm_file || !(SUSFS_IS_INODE_SUS_MAP(file_inode(vma->vm_file)))) {\n\t\t\t\t\tsmap_gather_stats(vma, &mss, last_vma_end);\n\t\t\t\t}\n#else\n\t\t\t\tsmap_gather_stats(vma, &mss, last_vma_end);\n#endif\n\t\t\t}'
-                b
-              }
-              n
-              b loop
-            }' fs/proc/task_mmu.c
+            # 2. Safely rewrite the line using standard substitution anchored below Case 4
+            sed -i '/\/\* Case 4 above \*\//,/if (vma->vm_end > last_vma_end)/ s/if (vma->vm_end > last_vma_end)/if (vma->vm_end > last_vma_end) {\n#ifdef CONFIG_KSU_SUSFS_SUS_MAP\n\t\t\t\tif (!vma->vm_file || !(SUSFS_IS_INODE_SUS_MAP(file_inode(vma->vm_file)))) {\n\t\t\t\t\tsmap_gather_stats(vma, &mss, last_vma_end);\n\t\t\t\t}\n#else\n\t\t\t\tsmap_gather_stats(vma, &mss, last_vma_end);\n#endif\n\t\t\t}/' fs/proc/task_mmu.c
           fi
           # ──────────────────────────────────────────────────────────────────
 
