@@ -53,7 +53,7 @@
 
 ### 🌐 Networking
 - ✅ **TCP BBR + Brutal** – Modern congestion control algorithms
-- ✅ **BBRv3** – Google's latest TCP congestion control, backported to 6.6 (WildKernels patch, FatalCoder524 integration method)
+- ✅ **BBRv3** – Google's latest TCP congestion control, backported to 6.6
 - ✅ **WireGuard** – Kernel-level VPN support
 - ✅ **Full Netfilter** – Conntrack, NAT, hashlimit *(optional)*
 - ✅ **IP_SET + IPv6 NAT** – Advanced firewall + IPv6 masquerade *(optional)*
@@ -138,7 +138,7 @@
 ### Quick Start
 1. **Fork** this repository (ensure all branches are copied)
 2. Go to **Actions** → Enable workflows
-3. Click **"KernelSU Next OP13 Build"** → **"Run workflow"**
+3. Click **"SukiSU Ultra OP13 Build"** (or any other) → **"Run workflow"**
 4. Configure options:
    - ✅ SuSFS (recommended for hiding)
    - ✅ Fengchi (performance scheduler)
