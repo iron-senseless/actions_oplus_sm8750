@@ -347,8 +347,8 @@ jobs:
       - name: ⚡ Setup KageSU
         run: |
           cd kernel_workspace/common
-          echo "🛠️ Setting up RKgeSU (upstream)..."
-          curl -LSs "https://raw.githubusercontent.com/KageKSU/KageSU/upstream/kernel/setup.sh" | bash -s upstream
+          echo "🛠️ Setting up KageSU (rework)..."
+          curl -LSs "https://raw.githubusercontent.com/KageKSU/KageSU/rework/kernel/setup.sh" | bash -s rework
           cd KernelSU
           KSU_VERSION_COUNT=$(git rev-list --count HEAD)
           export KSUVER=$(expr $KSU_VERSION_COUNT + 30700)
