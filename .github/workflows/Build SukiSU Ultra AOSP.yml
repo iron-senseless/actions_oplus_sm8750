@@ -421,6 +421,46 @@ jobs:
           fi
           echo "✅ Base patches applied"
 
+              
+      - name: 🛠️ Inject Wild Kernel Bypass (Vermagic, kABI, Signature)
+        working-directory:kernel_workspace/common
+        run: |
+          echo "============================================="
+          echo "   Initiating Kernel Module Security Bypass  "
+          echo "============================================="
+
+          # 1. Vermagic Bypass
+          # Ищем проверку same_magic_flags и превращаем условие в if(0)
+          echo ">>> Patching Vermagic in main.c..."
+          sed -i 's/if (!same_magic_flags(modmagic, vermagic))/if (0 \/* bypass *\/)/g' kernel/module/main.c
+
+          # 2. kABI Bypass (CRC checks)
+          # Нейтрализуем проверку версий символов. 
+          # В GKI 6.1/6.6 проверка может быть в main.c или version.c
+          echo ">>> Patching kABI (CRC)..."
+          sed -i 's/if (!check_version(info, symname, mod, crc))/if (0 \/* bypass *\/)/g' kernel/module/main.c 2>/dev/null || true
+        
+          # Альтернативный удар по kABI: заставляем саму функцию возвращать успех (1) вместо ошибки (-ENOEXEC)
+          sed -i 's/return -ENOEXEC;/return 1; \/\/ kABI bypass /g' kernel/module/version.c 2>/dev/null || true
+
+          # 3. Signature Verification Bypass
+          # Ядро должно "съедать" модули, даже если нет нужного публичного ключа (-ENOKEY) 
+          # или если подпись отвергнута (-EKEYREJECTED).
+          echo ">>> Patching Module Signatures in signing.c..."
+          sed -i 's/return -ENOKEY;/return 0; \/\/ signature bypass -ENOKEY/g' kernel/module/signing.c
+          sed -i 's/return -EKEYREJECTED;/return 0; \/\/ signature bypass -EKEYREJECTED/g' kernel/module/signing.c
+
+          # 4. Defconfig Fallback
+          # Жестко выпиливаем принудительную проверку подписи на уровне конфигурации ядра.
+          # Ищем все defconfig файлы для ARM64 и отключаем CONFIG_MODULE_SIG_FORCE
+          echo ">>> Disabling MODULE_SIG_FORCE in defconfigs..."
+          find arch/arm64/configs -name "*defconfig" -exec sed -i 's/CONFIG_MODULE_SIG_FORCE=y/# CONFIG_MODULE_SIG_FORCE is not set/g' {} +
+
+          # Проверка (опционально, чтобы в логах Actions было видно, что патч сработал)
+          echo ">>> Verifying patches:"
+          grep -n "bypass" kernel/module/main.c || echo "main.c not patched!"
+          grep -n "bypass" kernel/module/signing.c || echo "signing.c not patched!"          
+          
       - name: ⚙️ Configure Kernel Options
         run: |
           cd kernel_workspace
