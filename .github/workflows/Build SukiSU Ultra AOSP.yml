@@ -423,7 +423,7 @@ jobs:
 
               
       - name: 🛠️ Inject Wild Kernel Bypass (Vermagic, kABI, Signature)
-        working-directory:kernel_workspace/common
+        working-directory: kernel_workspace/common
         run: |
           echo "============================================="
           echo "   Initiating Kernel Module Security Bypass  "
