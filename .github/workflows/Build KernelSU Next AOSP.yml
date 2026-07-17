@@ -349,7 +349,12 @@ jobs:
           export KSUVER=$(expr 10000 + $KSU_GIT_VERSION + 200)
           echo "KSUVER=$KSUVER" >> $GITHUB_ENV
           echo "✅ KernelSU-Next $(git describe --tags 2>/dev/null || git rev-parse --short HEAD)  (ver $KSUVER)"
-
+          
+      - name: Patch KernelSU-Next Preprocessor Bug
+        run: |
+          sed -i '/ksu_late_loaded = false;/i #ifdef CONFIG_KSU_LATE_LOAD' kernel_workspace/common/drivers/kernelsu/core/init.c
+          sed -i '/ksu_late_loaded = false;/a #endif' kernel_workspace/common/drivers/kernelsu/core/init.c
+          
       - name: 🔧 Setup Patches
         run: |
           cd kernel_workspace
