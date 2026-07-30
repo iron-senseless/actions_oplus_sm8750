@@ -364,7 +364,7 @@ jobs:
         run: |
           cd kernel_workspace
           if [ "${{ github.event.inputs.SUSFS }}" == "true" ]; then
-            git clone --depth=1 -b gki-android15-6.6 https://gitlab.com/cctv18/susfs4oki.git &
+            git clone --depth=1 -b gki-android15-6.6 https://github.com/cctv18/susfs4oki.git &
           fi
           git clone --depth=1 https://github.com/mrcxlinux/kernel_patches.git &
           git clone --depth=1 https://github.com/ShirkNeko/SukiSU_patch.git &
