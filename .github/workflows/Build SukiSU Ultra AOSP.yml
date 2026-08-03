@@ -23,7 +23,7 @@ on:
         description: 'Install LZ4 1.10.0 + ZSTD 1.5.7 Patch'
         required: true
         type: boolean
-        default: true
+        default: false
       lz4kd_enable:
         description: 'Install LZ4KD Patch (ZRAM optimization)'
         required: true
@@ -33,7 +33,7 @@ on:
         description: "Enable TCP BBR/Brutal (false=off, true=add, default=set as default)"
         required: true
         type: choice
-        default: 'true'
+        default: 'default'
         options:
           - 'false'
           - 'true'
@@ -47,7 +47,7 @@ on:
         description: 'Enable Re-Kernel Support (Enhances app freezing via NoActive/Freezer)'
         required: true
         type: boolean
-        default: false
+        default: true
       baseband_guard:
         description: 'Enable Baseband Guard (Anti-brick modem protection)'
         required: true
@@ -71,7 +71,7 @@ on:
         description: 'Enable BORE Scheduler (Burst-Oriented Response Enhancer, off by default)'
         required: true
         type: boolean
-        default: false
+        default: true
       zram_writeback:
         description: 'Enable ZRAM Writeback (better memory management)'
         required: true
@@ -81,7 +81,7 @@ on:
         description: 'Enable SchedUtil optimizations (better CPU governor)'
         required: true
         type: boolean
-        default: false
+        default: true
       cpu_opt:
         description: 'CPU Optimizations (Oryon MCPU tuning for SM8750)'
         required: true
@@ -91,7 +91,7 @@ on:
         description: 'F2FS Optimizations (better flash storage performance)'
         required: true
         type: boolean
-        default: false
+        default: true
       wireguard:
         description: 'Enable WireGuard VPN support'
         required: true
@@ -121,7 +121,7 @@ on:
         description: 'Enable NTSync (low-latency NT sync primitives, great for gaming/Wine)'
         required: true
         type: boolean
-        default: false
+        default: true
       droidspaces_enable:
         description: 'Enable Droidspaces (SYSVIPC + PID_NS + POSIX_MQUEUE for proot-distro)'
         required: true
@@ -131,12 +131,12 @@ on:
         description: 'Enable IP_SET + IPv6 NAT (advanced firewall + IPv6 masquerade)'
         required: true
         type: boolean
-        default: false
+        default: true
       ttl_enable:
         description: 'Enable TTL/HL Target (hide tethering from carrier detection)'
         required: true
         type: boolean
-        default: false
+        default: true
       mem_opt_patches:
         description: 'Enable memory/scheduler optimization patches (from WildKernels)'
         required: true
@@ -458,6 +458,20 @@ jobs:
             echo "CONFIG_KSU_SUSFS_SUS_OVERLAYFS=n" >> "$DEFCONFIG"
             echo "CONFIG_KSU_SUSFS_SUS_SU=n" >> "$DEFCONFIG"
           fi
+
+          TUNING_FLAGS="-mllvm -inline-threshold=375 \
+                        -mllvm -inlinehint-threshold=500 \
+                        -mllvm -inline-cold-callsite-threshold=45 \
+                        -mllvm -regalloc=pbqp \
+                        -mllvm -unroll-threshold=400 \
+                        -mllvm -slp-max-reg-size=128"
+          
+          if [ -n "$KCFLAGS" ]; then
+            echo "KCFLAGS=$KCFLAGS $TUNING_FLAGS" >> $GITHUB_ENV
+          else
+            echo "KCFLAGS=$TUNING_FLAGS" >> $GITHUB_ENV
+          fi
+
 
       - name: Apply LZ4 1.10.0 & ZSTD 1.5.7 Patches
         if: inputs.lz4_enable
