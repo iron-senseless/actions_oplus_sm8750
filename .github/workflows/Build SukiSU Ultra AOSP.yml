@@ -231,6 +231,8 @@ jobs:
             sed -i '$i res=$(echo "$res" | sed '\''s/-dirty//g'\'')' "$f"
           done
 
+          curl -sSL "https://android.googlesource.com/toolchain/pgo-profiles/+/refs/heads/main/kernel/aarch64/android15-6.6/kernel.afdo?format=TEXT" | base64 --decode > $GITHUB_WORKSPACE/kernel.afdo
+
           echo "Source and tools initialized successfully!"
 
       - name: Cache ccache-ECS binary
@@ -957,7 +959,7 @@ jobs:
           make -j$(nproc --all) LLVM=1 LLVM_IAS=1 ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- \
             CC="ccache clang" LD="$(pwd)/ld-wrapper" HOSTLD="$(pwd)/ld-wrapper" \
             O=$GITHUB_WORKSPACE/kout \
-            KCFLAGS="-O2 -pipe -Wno-error -Wno-implicit-function-declaration -Wno-implicit-int -Wno-default-const-init-var-unsafe -Wno-format -Wno-unknown-warning-option ${EXTRA_CFLAGS:-} ${MAP}" \
+            KCFLAGS="-O2 -pipe -Wno-error -Wno-implicit-function-declaration -Wno-implicit-int -Wno-default-const-init-var-unsafe -Wno-format -Wno-unknown-warning-option -fprofile-sample-use=$GITHUB_WORKSPACE/kernel.afdo ${EXTRA_CFLAGS:-} ${MAP}" \
             Image
 
           echo "Kernel Compilation Complete!"
