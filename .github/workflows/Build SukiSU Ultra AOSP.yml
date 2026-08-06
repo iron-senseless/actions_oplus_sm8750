@@ -228,10 +228,11 @@ jobs:
           rm -f common/android/abi_gki_protected_exports_*
           sed -i 's/-dirty//g' common/scripts/setlocalversion
           
-          curl -sSL "https://android.googlesource.com/toolchain/pgo-profiles/+/refs/heads/main/kernel/aarch64/android15-6.6/kernel.afdo?format=TEXT" | base64 --decode > $GITHUB_WORKSPACE/kernel.afdo
+          curl -sSL "https://android.googlesource.com/toolchain/pgo-profiles/+/refs/heads/main/kernel/aarch64/android15-6.6/kernel.afdo?format=TEXT" \
+            | tr -d '\r\n' | base64 -d -i > $GITHUB_WORKSPACE/kernel.afdo
 
           echo "Source and tools initialized successfully!"
-
+          
       - name: Cache ccache-ECS binary
         uses: actions/cache@v4
         id: ecs-cache
