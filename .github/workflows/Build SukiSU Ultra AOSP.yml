@@ -908,13 +908,19 @@ jobs:
           curl -sSL https://github.com/cctv18/Baseband-guard/raw/master/setup.sh | bash
           sed -i '/^config LSM$/,/^help$/{ /^[[:space:]]*default/ { /baseband_guard/! s/selinux/selinux,baseband_guard/ } }' security/Kconfig
 
+
       - name: 📦 Add build name
         run: |
           cd kernel_workspace
-          sudo sed -i "s/-4k/-palaziks-ShiftPorts/g" ./common/arch/arm64/configs/gki_defconfig
+          BUILD_HASH=$(git -C ./common rev-parse --short=8 HEAD 2>/dev/null || echo "${GITHUB_SHA::8}")
+          BUILD_TIME=$(date -u +'%Y%m%d-%H%M%S')
+          NEW_LOCALVERSION="-android15-0-palaziks-ShiftPorts-g${BUILD_HASH}-${BUILD_TIME}"
+          sed -i '/CONFIG_LOCALVERSION=/d' ./common/arch/arm64/configs/gki_defconfig
+          echo "CONFIG_LOCALVERSION=\"${NEW_LOCALVERSION}\"" >> ./common/arch/arm64/configs/gki_defconfig
           sed -i 's/${scm_version}//' ./common/scripts/setlocalversion
           echo "CONFIG_LOCALVERSION_AUTO=n" >> ./common/arch/arm64/configs/gki_defconfig
 
+      
       - name: 🔨 Build Kernel
         run: |
           WORKDIR="$(pwd)"
