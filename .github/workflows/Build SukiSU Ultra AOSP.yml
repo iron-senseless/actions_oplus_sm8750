@@ -914,7 +914,7 @@ jobs:
           cd kernel_workspace
           BUILD_HASH=$(git -C ./common rev-parse --short=8 HEAD 2>/dev/null || echo "${GITHUB_SHA::8}")
           BUILD_TIME=$(date -u +'%Y%m%d-%H%M%S')
-          NEW_LOCALVERSION="-android15-0-palaziks-ShiftPorts-g${BUILD_HASH}-${BUILD_TIME}"
+          NEW_LOCALVERSION="-android15-8-g${BUILD_HASH}-${BUILD_TIME}"
           sed -i '/CONFIG_LOCALVERSION=/d' ./common/arch/arm64/configs/gki_defconfig
           echo "CONFIG_LOCALVERSION=\"${NEW_LOCALVERSION}\"" >> ./common/arch/arm64/configs/gki_defconfig
           sed -i 's/${scm_version}//' ./common/scripts/setlocalversion
