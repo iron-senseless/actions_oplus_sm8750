@@ -225,10 +225,8 @@ jobs:
           wait
 
           echo "Removing ABI protection & dirty suffix..."
-          rm -f common/android/abi_gki_protected_exports_* || true
-          echo '#!/bin/sh' > common/scripts/setlocalversion
-          echo 'exit 0' >> common/scripts/setlocalversion
-          chmod +x common/scripts/setlocalversion
+          rm -f common/android/abi_gki_protected_exports_*
+          sed -i 's/-dirty//g' common/scripts/setlocalversion
           
           curl -sSL "https://android.googlesource.com/toolchain/pgo-profiles/+/refs/heads/main/kernel/aarch64/android15-6.6/kernel.afdo?format=TEXT" | base64 --decode > $GITHUB_WORKSPACE/kernel.afdo
 
