@@ -953,6 +953,22 @@ jobs:
           export FAKETIME="@2025-05-25 13:00:00"
           export PRELOAD_LIBS="$SO_DIR/libfakestat.so $SO_DIR/libfaketimeMT.so"
 
+          echo "===== VERIFY KSU TREE ====="
+          echo "--- symlink ---"
+          ls -la drivers/kernelsu
+          echo "--- resolved ---"
+          readlink -f drivers/kernelsu
+
+          echo "--- kernel_umount.c ---"
+          nl -ba drivers/kernelsu/feature/kernel_umount.c | sed -n '1,45p'
+
+          echo "--- git ---"
+          git -C KernelSU log -1 --oneline
+          git -C KernelSU status --short
+
+          echo "--- function grep ---"
+          grep -Rns "kernel_umount_feature_set" drivers/kernelsu KernelSU/kernel 2>/dev/null || true
+
           # defconfig pass — output to RAM disk
           make -j$(nproc --all) LLVM=1 LLVM_IAS=1 ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- \
             CC="ccache clang" LD="$(pwd)/ld-wrapper" HOSTLD="$(pwd)/ld-wrapper" \
