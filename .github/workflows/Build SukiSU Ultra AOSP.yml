@@ -360,31 +360,6 @@ jobs:
           EOF
           echo "✅ SukiSU $KSUVER (v${KSU_API_VERSION}-${KSU_COMMIT_HASH}@palaziks)"
 
-      - name: 🩹 Fix SukiSU kernel_umount handler
-        run: |
-          cd kernel_workspace/common
-
-          KSU_UMOUNT="KernelSU/kernel/feature/kernel_umount.c"
-
-          if [ ! -f "$KSU_UMOUNT" ]; then
-            echo "⚠️ $KSU_UMOUNT not found, skipping fix"
-            exit 0
-          fi
-
-          if grep -q '\.set_handler = kernel_umount_feature_set' "$KSU_UMOUNT" \
-             && ! grep -q '^static int kernel_umount_feature_set' "$KSU_UMOUNT"; then
-            echo "🩹 Adding missing kernel_umount_feature_set()..."
-
-            perl -0pi -e 's/static const struct ksu_feature_handler kernel_umount_handler/static int kernel_umount_feature_set(u64 value)\n{\n    bool enable = value != 0;\n    ksu_kernel_umount_enabled = enable;\n    pr_info("kernel_umount: set to %d\\n", enable);\n    return 0;\n}\n\nstatic const struct ksu_feature_handler kernel_umount_handler/' "$KSU_UMOUNT"
-
-            echo "✅ kernel_umount_feature_set() added"
-          else
-            echo "✅ kernel_umount_feature_set() already present or handler not used"
-          fi
-
-          echo "--- verification ---"
-          nl -ba "$KSU_UMOUNT" | sed -n '1,35p'
-
       - name: 🔧 Setup Patches
         run: |
           cd kernel_workspace
@@ -977,22 +952,6 @@ jobs:
           export FAKESTAT="2025-05-25 12:00:00"
           export FAKETIME="@2025-05-25 13:00:00"
           export PRELOAD_LIBS="$SO_DIR/libfakestat.so $SO_DIR/libfaketimeMT.so"
-
-          echo "===== VERIFY KSU TREE ====="
-          echo "--- symlink ---"
-          ls -la drivers/kernelsu
-          echo "--- resolved ---"
-          readlink -f drivers/kernelsu
-
-          echo "--- kernel_umount.c ---"
-          nl -ba drivers/kernelsu/feature/kernel_umount.c | sed -n '1,45p'
-
-          echo "--- git ---"
-          git -C KernelSU log -1 --oneline
-          git -C KernelSU status --short
-
-          echo "--- function grep ---"
-          grep -Rns "kernel_umount_feature_set" drivers/kernelsu KernelSU/kernel 2>/dev/null || true
 
           # defconfig pass — output to RAM disk
           make -j$(nproc --all) LLVM=1 LLVM_IAS=1 ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- \
