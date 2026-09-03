@@ -341,7 +341,10 @@ jobs:
         run: |
           cd kernel_workspace/common
           echo "🛠️ Setting up SukiSU Ultra (builtin)..."
-          curl -LSs "https://raw.githubusercontent.com/SukiSU-Ultra/SukiSU-Ultra/builtin/kernel/setup.sh" | bash -s builtin
+          git clone https://github.com/SukiSU-Ultra/SukiSU-Ultra.git /tmp/SukiSU
+          cd /tmp/SukiSU
+          git checkout b1d534bc
+          bash /tmp/SukiSU/kernel/setup.sh builtin
           cd KernelSU
           KSU_VERSION_COUNT=$(git rev-list --count HEAD)
           export KSUVER=$(expr $KSU_VERSION_COUNT + 37185)
