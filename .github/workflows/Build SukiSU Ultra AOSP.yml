@@ -912,7 +912,7 @@ jobs:
       
           cd "${GITHUB_WORKSPACE}/kernel_workspace"
       
-          mkdir -p "${GITHUB_WORKSPACE}/build-diagnostics"
+          mkdir -p "${GITHUB_WORKSPACE}/kernel_workspace/build-diagnostics"
       
           {
             echo "=== BUILD ENVIRONMENT ==="
