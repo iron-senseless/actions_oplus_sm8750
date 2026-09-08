@@ -275,25 +275,18 @@ jobs:
           df -h
           echo "Current Build Kernel Version: 6.6.142"
 
-      - name: Restore CCache
-        uses: actions/cache/restore@v4
-        id: ccache-restore
-        with:
-          path: ${{ env.CCACHE_DIR }}
-          key: ${{ env.CCACHE_KEY }}-${{ runner.os }}-${{ github.ref_name }}-${{ github.run_id }}
-          restore-keys: |
-            ${{ env.CCACHE_KEY }}-${{ runner.os }}-${{ github.ref_name }}-
-            ${{ env.CCACHE_KEY }}-${{ runner.os }}-
-            ${{ env.CCACHE_KEY }}-
+      - name: Prepare Clean CCache
+        run: |
+          rm -rf "${CCACHE_DIR}"
+          mkdir -p "${CCACHE_DIR}"
+          echo "Clean ccache directory prepared: ${CCACHE_DIR}"
 
-      - name: Restore LTO Cache
-        uses: actions/cache/restore@v4
+      - name: Prepare Clean LTO Cache
         if: inputs.lto_type == 'thin'
-        with:
-          path: ${{ env.LDCACHE_DIR }}
-          key: lto-cache-${{ runner.os }}-${{ github.ref_name }}-${{ github.run_id }}
-          restore-keys: |
-            lto-cache-${{ runner.os }}-${{ github.ref_name }}-
+        run: |
+          rm -rf "${LDCACHE_DIR}"
+          mkdir -p "${LDCACHE_DIR}"
+          echo "Clean LTO cache directory prepared: ${LDCACHE_DIR}"
 
       - name: Pull Public CCache
         env:
@@ -309,13 +302,13 @@ jobs:
           mkdir -p ${{ env.CCACHE_DIR }}
           FILE_NAME="ccache-6.6.142.tar.zst"
           
-          if gh release download -p "$FILE_NAME" -R cctv18/public_ccache; then
-            echo "Successfully downloaded $FILE_NAME, extracting..."
-            tar -I zstd -xf "$FILE_NAME" -C ${{ env.CCACHE_DIR }}
-            echo "Public ccache restored successfully!"
-          else
-            echo "Public ccache not found, proceeding with full clean build..."
-          fi
+#          if gh release download -p "$FILE_NAME" -R cctv18/public_ccache; then
+#            echo "Successfully downloaded $FILE_NAME, extracting..."
+#            tar -I zstd -xf "$FILE_NAME" -C ${{ env.CCACHE_DIR }}
+ #           echo "Public ccache restored successfully!"
+  #        else
+   #         echo "Public ccache not found, proceeding with full clean build..."
+    #      fi
       
       - name: Init and Config CCache
         run: |
@@ -912,6 +905,72 @@ jobs:
           curl -sSL https://github.com/cctv18/Baseband-guard/raw/master/setup.sh | bash
           sed -i '/^config LSM$/,/^help$/{ /^[[:space:]]*default/ { /baseband_guard/! s/selinux/selinux,baseband_guard/ } }' security/Kconfig
 
+      - name: Record Build Inputs
+        shell: bash
+        run: |
+          set -e
+      
+          mkdir -p "${GITHUB_WORKSPACE}/build-diagnostics"
+      
+          {
+            echo "=== BUILD ENVIRONMENT ==="
+            date -u
+            uname -a
+            echo "Runner OS: $RUNNER_OS"
+            echo "Runner Arch: $RUNNER_ARCH"
+      
+            echo
+            echo "=== KERNEL SOURCE ==="
+            git -C common rev-parse HEAD
+            git -C common status --short
+      
+            echo
+            echo "=== SUKISU ==="
+            git -C common/KernelSU rev-parse HEAD
+            git -C common/KernelSU status --short
+      
+            echo
+            echo "=== SUSFS ==="
+            git -C susfs4oki rev-parse HEAD
+            git -C susfs4oki status --short
+      
+            echo
+            echo "=== CLANG ==="
+            clang --version || true
+      
+            echo
+            echo "=== BUILD TOOLS ==="
+            if [ -x build-tools/bin/clang ]; then
+              build-tools/bin/clang --version || true
+            fi
+      
+            echo
+            echo "=== TOOL VERSIONS ==="
+            gcc --version | head -n 1 || true
+            make --version | head -n 1 || true
+            ld.lld --version | head -n 1 || true
+            pahole --version || true
+            ccache --version | head -n 1 || true
+      
+            echo
+            echo "=== AFDO ==="
+            sha256sum kernel.afdo 2>/dev/null || true
+      
+            echo
+            echo "=== CLANG FILE TREE HASH ==="
+            find clang-r563880c -type f -print0 2>/dev/null \
+              | sort -z \
+              | xargs -0 sha256sum 2>/dev/null \
+              | sha256sum || true
+      
+            echo
+            echo "=== BUILD-TOOLS FILE TREE HASH ==="
+            find build-tools -type f -print0 2>/dev/null \
+              | sort -z \
+              | xargs -0 sha256sum 2>/dev/null \
+              | sha256sum || true
+      
+          } | tee build-diagnostics/build-inputs.txt
 
       - name: 📦 Add build name
         run: |
@@ -965,6 +1024,9 @@ jobs:
             KCFLAGS="-O2 -pipe -Wno-error -Wno-implicit-function-declaration -Wno-implicit-int -Wno-default-const-init-var-unsafe -Wno-format -Wno-unknown-warning-option" \
             gki_defconfig
 
+            set -e
+            sha256sum out/.config | tee build-diagnostics/config.sha256
+
           # Image build — output to RAM disk
           make -j$(nproc --all) LLVM=1 LLVM_IAS=1 ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- \
             CC="ccache clang" LD="$(pwd)/ld-wrapper" HOSTLD="$(pwd)/ld-wrapper" \
@@ -978,6 +1040,21 @@ jobs:
           echo "CCache Status:"
           ccache -s
           df -h
+
+
+      - name: Record Final Image Hash
+        shell: bash
+        run: |
+          set -e
+          sha256sum out/arch/arm64/boot/Image \
+          | tee build-diagnostics/Image.sha256
+
+      - name: Upload Build Diagnostics
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-diagnostics
+          path: build-diagnostics/
+          retention-days: 7
 
       - name: 📦 Save New CCache
         if: success()
