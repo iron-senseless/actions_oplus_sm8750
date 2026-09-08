@@ -955,7 +955,7 @@ jobs:
       
             echo
             echo "=== BUILD TOOLS ==="
-            build-tools/bin/clang --version || true
+            build-tools/linux-x86/bin/clang --version || true
       
             echo
             echo "=== TOOL VERSIONS ==="
@@ -1038,7 +1038,8 @@ jobs:
             gki_defconfig
 
             set -e
-            sha256sum out/.config | tee build-diagnostics/config.sha256
+            test -f "$GITHUB_WORKSPACE/kout/.config"
+            sha256sum "$GITHUB_WORKSPACE/kout/.config" | tee "$GITHUB_WORKSPACE/kernel_workspace/build-diagnostics/config.sha256"
 
           # Image build — output to RAM disk
           make -j$(nproc --all) LLVM=1 LLVM_IAS=1 ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- \
