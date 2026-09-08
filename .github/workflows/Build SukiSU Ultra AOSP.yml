@@ -912,7 +912,7 @@ jobs:
       
           cd "${GITHUB_WORKSPACE}/kernel_workspace"
       
-          mkdir -p "${GITHUB_WORKSPACE}/kernel_workspace/build-diagnostics"
+          mkdir -p "${GITHUB_WORKSPACE}/build-diagnostics"
       
           {
             echo "=== BUILD ENVIRONMENT ==="
@@ -1039,7 +1039,7 @@ jobs:
 
             set -e
             test -f "$GITHUB_WORKSPACE/kout/.config"
-            sha256sum "$GITHUB_WORKSPACE/kout/.config" | tee "$GITHUB_WORKSPACE/kernel_workspace/build-diagnostics/config.sha256"
+            sha256sum "$GITHUB_WORKSPACE/kout/.config" | tee "$GITHUB_WORKSPACE/build-diagnostics/config.sha256"
 
           # Image build — output to RAM disk
           make -j$(nproc --all) LLVM=1 LLVM_IAS=1 ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- \
@@ -1060,8 +1060,8 @@ jobs:
         shell: bash
         run: |
           set -e
-          sha256sum out/arch/arm64/boot/Image \
-          | tee build-diagnostics/Image.sha256
+          sha256sum "$GITHUB_WORKSPACE/kout/arch/arm64/boot/Image" \
+          | tee "$GITHUB_WORKSPACE/build-diagnostics/Image.sha256"
 
       - name: Upload Build Diagnostics
         uses: actions/upload-artifact@v4
