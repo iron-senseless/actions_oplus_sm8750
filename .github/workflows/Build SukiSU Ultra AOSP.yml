@@ -910,6 +910,8 @@ jobs:
         run: |
           set -e
       
+          cd "${GITHUB_WORKSPACE}/kernel_workspace"
+      
           mkdir -p "${GITHUB_WORKSPACE}/build-diagnostics"
       
           {
@@ -936,13 +938,11 @@ jobs:
       
             echo
             echo "=== CLANG ==="
-            clang --version || true
+            clang-r563880c/bin/clang --version || true
       
             echo
             echo "=== BUILD TOOLS ==="
-            if [ -x build-tools/bin/clang ]; then
-              build-tools/bin/clang --version || true
-            fi
+            build-tools/bin/clang --version || true
       
             echo
             echo "=== TOOL VERSIONS ==="
@@ -954,7 +954,7 @@ jobs:
       
             echo
             echo "=== AFDO ==="
-            sha256sum kernel.afdo 2>/dev/null || true
+            sha256sum "${GITHUB_WORKSPACE}/kernel.afdo" 2>/dev/null || true
       
             echo
             echo "=== CLANG FILE TREE HASH ==="
@@ -970,7 +970,7 @@ jobs:
               | xargs -0 sha256sum 2>/dev/null \
               | sha256sum || true
       
-          } | tee build-diagnostics/build-inputs.txt
+          } | tee "${GITHUB_WORKSPACE}/build-diagnostics/build-inputs.txt"
 
       - name: 📦 Add build name
         run: |
