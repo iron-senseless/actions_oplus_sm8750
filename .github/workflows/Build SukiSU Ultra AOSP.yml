@@ -923,8 +923,21 @@ jobs:
       
             echo
             echo "=== KERNEL SOURCE ==="
-            git -C common rev-parse HEAD
-            git -C common status --short
+            
+            if [ -d common/.git ]; then
+                echo "Source type: git"
+                echo "Commit: $(git -C common rev-parse HEAD)"
+                git -C common status --short
+            else
+                echo "Source type: archive"
+                echo "Repository: palazik/android_kernel_common_oneplus_sm8750"
+                echo "Ref: 6.6.142_oneplus13_coloros16"
+                echo "Source tree SHA256:"
+                find common -type f -print0 \
+                    | sort -z \
+                    | xargs -0 sha256sum \
+                    | sha256sum
+            fi
       
             echo
             echo "=== SUKISU ==="
