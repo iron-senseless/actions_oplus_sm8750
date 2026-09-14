@@ -354,12 +354,9 @@ jobs:
       
           echo "⬇️ Cloning patch repos..."
           if [ "${{ github.event.inputs.SUSFS }}" == "true" ]; then
-                        git init susfs4ksu
+            git clone https://github.com/simonpunk/susfs4ksu.git susfs4ksu
             cd susfs4ksu
-            git remote add origin https://github.com/simonpunk/susfs4ksu.git
-            git fetch --depth=1 origin 937215cb3a1b1f333d764c366c7a49972fa8e7a0
-            git checkout FETCH_HEAD
-            cd ..
+            git checkout 937215cb3a1b1f333d764c366c7a49972fa8e7a0            cd ..
             git clone --depth=1 https://github.com/palazik/kernel_patches.git wild_susfs_fix &
           fi
           git clone --depth=1 https://github.com/mrcxlinux/kernel_patches.git &
