@@ -349,6 +349,8 @@ jobs:
           echo "✅ KernelSU-Next $(git describe --tags 2>/dev/null || git rev-parse --short HEAD)  (ver $KSUVER)"
 
       - name: 🔧 Setup Patches
+        env:
+          GIT_TERMINAL_PROMPT: 0
         run: |
           cd kernel_workspace
       
@@ -356,7 +358,8 @@ jobs:
           if [ "${{ github.event.inputs.SUSFS }}" == "true" ]; then
             git clone https://github.com/simonpunk/susfs4ksu.git susfs4ksu
             cd susfs4ksu
-            git checkout 937215cb3a1b1f333d764c366c7a49972fa8e7a0            cd ..
+            git checkout 937215cb3a1b1f333d764c366c7a49972fa8e7a0            
+            cd ..
             git clone --depth=1 https://github.com/palazik/kernel_patches.git wild_susfs_fix &
           fi
           git clone --depth=1 https://github.com/mrcxlinux/kernel_patches.git &
