@@ -341,7 +341,7 @@ jobs:
         run: |
           cd kernel_workspace/common
           echo "🛠️ Setting up KernelSU-Next (dev branch)..."
-          curl -LSs "https://raw.githubusercontent.com/KernelSU-Next/KernelSU-Next/next/kernel/setup.sh" | bash -s dev
+          curl -LSs "https://raw.githubusercontent.com/KernelSU-Next/KernelSU-Next/next/kernel/setup.sh" | bash -s 19d9e1f255d4afedb85eb7032f4725cda6d25d36
           cd KernelSU-Next
           KSU_GIT_VERSION=$(git rev-list --count HEAD)
           export KSUVER=$(expr 10000 + $KSU_GIT_VERSION + 200)
@@ -354,7 +354,12 @@ jobs:
       
           echo "⬇️ Cloning patch repos..."
           if [ "${{ github.event.inputs.SUSFS }}" == "true" ]; then
-            git clone --depth=1 https://gitlab.com/simonpunk/susfs4ksu.git -b gki-android15-6.6 &
+                        git init susfs4ksu
+            cd susfs4ksu
+            git remote add origin https://github.com/simonpunk/susfs4ksu.git
+            git fetch --depth=1 origin 937215cb3a1b1f333d764c366c7a49972fa8e7a0
+            git checkout FETCH_HEAD
+            cd ..
             git clone --depth=1 https://github.com/palazik/kernel_patches.git wild_susfs_fix &
           fi
           git clone --depth=1 https://github.com/mrcxlinux/kernel_patches.git &
