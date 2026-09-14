@@ -356,15 +356,15 @@ jobs:
       
           echo "⬇️ Cloning patch repos..."
           if [ "${{ github.event.inputs.SUSFS }}" == "true" ]; then
-            git clone https://github.com/simonpunk/susfs4ksu.git susfs4ksu
+            git clone https://github.com/simonpunk/susfs4ksu susfs4ksu
             cd susfs4ksu
             git checkout 937215cb3a1b1f333d764c366c7a49972fa8e7a0            
             cd ..
-            git clone --depth=1 https://github.com/palazik/kernel_patches.git wild_susfs_fix &
+            git clone --depth=1 https://github.com/palazik/kernel_patches wild_susfs_fix &
           fi
-          git clone --depth=1 https://github.com/mrcxlinux/kernel_patches.git &
-          git clone --depth=1 https://github.com/ShirkNeko/SukiSU_patch.git &
-          git clone --depth=1 https://github.com/palazik/kernel_patches.git wildkernels_patches &
+          git clone --depth=1 https://github.com/mrcxlinux/kernel_patches &
+          git clone --depth=1 https://github.com/ShirkNeko/SukiSU_patch &
+          git clone --depth=1 https://github.com/palazik/kernel_patches wildkernels_patches &
           wait
       
           if [ "${{ github.event.inputs.SUSFS }}" == "true" ]; then
